@@ -82,6 +82,7 @@ if nErr,
    end;
 end;
 
+
 %fprintf('LSreadXXXFile finished\n');
 %[osense,oshift,adC,adB,csense,aiAcols,acAcols,adCoef,aiArows,adL,adU,nErr] = mxlindo('LSgetLPData',iModel);
 [osense,oshift,c,b,csense,A,lb,ub,nErr]=mxlindo('LSXgetLPData',iModel);
@@ -120,6 +121,15 @@ LSprob.QCvar1 = QCvar1;
 LSprob.QCvar2 = QCvar2;
 LSprob.QCcoef = QCcoef;
 
+solFile = strrep(szInputFile,'.mps','.sol');
+errorcode = mxlindo('LSreadVarStartPoint',iModel,solFile);
+if errorcode==0,    
+    [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);
+    if nErr==0,
+        fprintf('Read initial solution file %s\n',solFile);
+        LSprob.B = B;
+    end
+end
 
 %[nErr]=mxlindo('LSwriteMPSFile',iModel,'temp.mps',1);
 if 0,

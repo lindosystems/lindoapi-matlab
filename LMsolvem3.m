@@ -153,12 +153,15 @@ if (exist('QCrows') & exist('QCvar1') & exist('QCvar2') & exist('QCcoef'))
    end;   
 end;
 
+opts={}
+opts.iDefaultLog = iDefaultLog;
+opts.nMethod = nMethod;
 
 if (nint == 0)
-   [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, iDefaultLog, nMethod);    
+   [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts);    
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 else
-   [x,y,s,d,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel, iDefaultLog, nMethod);     
+   [x,y,s,d,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel, opts);     
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 end;
 

@@ -44,12 +44,14 @@ if nargin < 2,
     opts.iDefaultLog=1;
     opts.presolve=1;
     opts.B = [];
+    opts.numAltOpt = 0;
 end;
 if ~isfield(opts,'nMethod'), opts.nMethod=LS_METHOD_FREE; end
 if ~isfield(opts,'iDefaultLog'), opts.iDefaultLog=1; end
 if ~isfield(opts,'presolve'), opts.presolve=1; end
 if ~isfield(opts,'B'), opts.B=[]; end
 if ~isfield(opts,'IUSOL'), opts.IUSOL=0; end
+if ~isfield(opts,'numAltOpt'), opts.numAltOpt=0; end
 
 x = []; c = []; A = []; b = []; lb = []; ub = []; csense = []; vtype = []; 
 QCrows = []; QCvar1 = []; QCvar2 = []; QCcoef = []; R = []; osense = LS_MIN;
@@ -67,6 +69,7 @@ if isfield(LSprob,'QCvar1') QCvar1 = LSprob.QCvar1; end
 if isfield(LSprob,'QCvar2') QCvar2 = LSprob.QCvar2; end
 if isfield(LSprob,'QCcoef') QCcoef = LSprob.QCcoef; end
 if isfield(LSprob,'R') R = LSprob.R; end
+if isfield(LSprob,'B') B = LSprob.B; end
 if isfield(LSprob,'osense') osense = LSprob.osense; end
 
 
@@ -171,10 +174,20 @@ end
 
 
 if (nint == 0)
+   if ~isempty(B) && isfield(B,'cbas'),
+       [nErr] = mxlindo('LSloadBasis',iModel,B.cbas,B.rbas);
+   end
    [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts); 
    B.cbas=[];B.rbas=[];
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-   [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);
+   if opts.numAltOpt>0,
+       if nStatus==LS_STATUS_BASIC_OPTIMAL,
+            nErr = mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLPOOL_LIM,opts.numAltOpt+1);
+            nErr = LMfindAltOpt(iEnv,iModel,opts);
+       else
+           fprintf('\nError: cannot compute alternative solutions when status=%d..\n',nStatus);
+       end
+   end
 else
    [x,y,s,d,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel, opts);     
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
@@ -193,3 +206,18 @@ if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 function myCleanupFun(iEnv)
     %%fprintf('Destroying LINDO environment\n');
     [nErr]=mxlindo('LSdeleteEnv',iEnv); 
+    
+%%    
+function nErr = LMfindAltOpt(iEnv,iModel,opts)   
+   for j1=1:opts.numAltOpt, 
+       [pnModStatus,nErr] = mxlindo('LSgetNextBestSol',iModel);
+       if nErr==0, 
+           [cbas,rbas,nErr] = mxlindo('LSgetBasis',iModel);
+            [x,nErr]=mxlindo('LSgetPrimalSolution',iModel);
+            fprintf('\nNextBestSol #%d, status:%d, |x|: %g',j1,pnModStatus,norm(x));
+       else
+            LMcheckError(iEnv,nErr,0);
+            break;
+       end
+   end
+   fprintf('\nComputed alternative solutions..\n');

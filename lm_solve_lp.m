@@ -7,7 +7,7 @@ function [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts)
 % 1415 North Dayton St.          info@lindo.com
 % Chicago, IL 60622              http://www.lindo.com    
 %
-% Usage [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, iDefaultLog, nMethod)
+% Usage [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts)
 
 %
 % Last update Jan 09, 2007 (MKA)
