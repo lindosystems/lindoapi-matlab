@@ -1,5 +1,5 @@
 function [LSprob] = LMreadmat(matFile)
-% LMREADMAT: Read an LP in MAT and return the associated data objects 
+% LMREADMAT: Read an LP in MAT format and return the associated data objects 
 % in LSprob structure. It optionally exports the model in MPS format.
 % See LMwritem.m
 %
