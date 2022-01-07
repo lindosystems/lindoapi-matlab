@@ -233,7 +233,7 @@ if (nint == 0)
        [nErr] = mxlindo('LSloadBasis',iModel,B.cbas,B.rbas);
        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
    end
-   [x,y,s,d,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
+   [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
    B.cbas=[];B.rbas=[];   
    [xsol,nErr] = lm_stat_lpsol(iModel);
    if LSopts.numAltOpt>0,
@@ -245,7 +245,7 @@ if (nint == 0)
        end
    end
 else
-   [x,y,s,d,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
+   [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
    [xsol,nErr] = lm_stat_mipsol(iModel);
 end;
 xsol.nStatus = nStatus;

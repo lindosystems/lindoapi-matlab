@@ -229,8 +229,14 @@ end
 
 if nargout>4,
    if ( ~isfield(xsol,'mipObj') ),
+       reps = sqrt(eps);
        lambda.lower   = dj;
-       lambda.upper   = dj;
+       lambda.upper   = dj;       
+       iL = find(dj>reps);
+       iU = find(dj<-reps);
+       lambda.lower(iU)=0;
+       lambda.upper(iL)=0;
+       clear iL iU;
        lambda.ineqlin = -y(1:mineq);
        lambda.eqlin   = -y((mineq+1):end);
    else
