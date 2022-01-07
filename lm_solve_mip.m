@@ -61,7 +61,7 @@ iDefaultLog = opts.iDefaultLog;
    if nErr ~= LSERR_NO_ERROR, return; end;   
 
    % Display solution stats    
-   nErr = lm_stat_mipsol(iModel,iDefaultLog);
+   [mipsol,nErr] = lm_stat_mipsol(iModel,iDefaultLog);
    if nErr ~= LSERR_NO_ERROR, return; end;   
    
    

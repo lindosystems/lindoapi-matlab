@@ -42,7 +42,6 @@ function [LSprob] = LMreadf(szInputFile,dropMethod,dropArg)
 
 global MY_LICENSE_FILE 
 lindo;
-LTF=0;
 if nargin<1
     help lmreadf
     return;
@@ -50,7 +49,7 @@ end
 
 if nargin<2, dropMethod=-1; end;
 if nargin<3, dropArg=-1; end;
-
+LTF = 0; % Convert to lower triangular form
 c = []; A = []; b = [];
 lb = []; ub=[]; csense=[];vtype=[];
 QCrows=[];QCvar1=[];QCvar2=[];QCcoef=[];
@@ -120,17 +119,19 @@ LSprob.QCrows = QCrows;
 LSprob.QCvar1 = QCvar1;
 LSprob.QCvar2 = QCvar2;
 LSprob.QCcoef = QCcoef;
+LSprob.oshift = oshift;
 
 solFile = strrep(szInputFile,'.mps','.sol');
-errorcode = mxlindo('LSreadVarStartPoint',iModel,solFile);
-if errorcode==0,    
-    [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);
-    if nErr==0,
-        fprintf('Read initial solution file %s\n',solFile);
-        LSprob.B = B;
+if exist(solFile, 'file') == 2    
+    errorcode = mxlindo('LSreadVarStartPoint',iModel,solFile);
+    if errorcode==0,    
+        [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);
+        if nErr==0,
+            fprintf('Read initial solution file %s\n',solFile);
+            LSprob.B = B;
+        end
     end
 end
-
 %[nErr]=mxlindo('LSwriteMPSFile',iModel,'temp.mps',1);
 if 0,
    fprintf('\n%12s %16s %16s %16s\n','Variable','Lower Bound','Upper Bound','Cost');
@@ -149,37 +150,43 @@ if 0,
    
 end;
 
+% Nonzero related structure
 R = {};
-[padCidx,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCINDEX);
-[padRidx,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRINDEX);
-[padCrnk,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCRANK);
-[padRrnk,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRRANK);
-[padCcnt,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCCOUNT);
-[padRcnt,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRCOUNT);
+if dropMethod>0,    
+    [padCidx,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCINDEX);
+    [padRidx,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRINDEX);
+    [padCrnk,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCRANK);
+    [padRrnk,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRRANK);
+    [padCcnt,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZCCOUNT);
+    [padRcnt,nErr] = mxlindo('LSgetNnzData',iModel,LS_IINFO_NZRCOUNT);
 
-R.rkeep = [1:m];
-R.ckeep = [1:n];
-R.rdrop = [];
-R.cdrop = [];
+    R.rkeep = [1:m];
+    R.ckeep = [1:n];
+    R.rdrop = [];
+    R.cdrop = [];
 
-R.padCcnt = padCcnt;
-R.padRcnt = padRcnt;
-R.padCidx = padCidx;
-R.padRidx = padRidx;
-R.padCrnk = padCrnk;
-R.padRrnk = padRrnk;
-LSprob.R = R;
+    R.padCcnt = padCcnt;
+    R.padRcnt = padRcnt;
+    R.padCidx = padCidx;
+    R.padRidx = padRidx;
+    R.padCrnk = padCrnk;
+    R.padRrnk = padRrnk;
+    
 
-if dropMethod==1,
-	cnt = dropArg; %floor(m*.01/50)+1;
-	LSprob.R = myKeepDrop_nzcnt(LSprob,cnt);
-elseif dropMethod==2,
-	LSprob.R = myKeepDrop_nzmaxpercol(LSprob,dropArg);
+    if dropMethod==1,
+        cnt = dropArg; %floor(m*.01/50)+1;
+        LSprob.R = myKeepDrop_nzcnt(LSprob,cnt);
+    elseif dropMethod==2,
+        LSprob.R = myKeepDrop_nzmaxpercol(LSprob,dropArg);
+    end
 end
 
+% LTF required
 if LTF>0,
     [R.panNewColIdx,R.panNewRowIdx,R.panNewColPos,R.panNewRowPos,nErr] = mxlindo('LSfindLtf',iModel);
 end    
+LSprob.R = R;
+
 % Un-hook
 [nErr]=mxlindo('LSdeleteModel',iModel);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;

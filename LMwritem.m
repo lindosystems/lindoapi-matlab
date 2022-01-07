@@ -1,4 +1,4 @@
-function [nErr] = LMwritem(szOutFile,LSprob,opts)
+function [nErr] = LMwritem(szOutFile,LSprob,LSopts)
 % LMWRITEM: Export a model in matrix form in MPS or LINDO format.
 %
 % Usage:  [nErr] =LMwritem(szOutFile,LSprob,opts)
@@ -14,13 +14,17 @@ function [nErr] = LMwritem(szOutFile,LSprob,opts)
 %
 global MY_LICENSE_FILE
 lindo;
+if nargin<1
+    help lmwritem
+    return;
+end
 
 if nargin < 3,
-    opts={};
-    opts.iDefaultLog=1;
-    opts.outFormat=0;
+    LSopts={};
+    LSopts.iDefaultLog=1;
+    LSopts.outFormat=0;
     if nargin <2,
-       fprintf('Incomplete model data\n');
+       fprintf('LMwritem requires at least two arguments\n');
        return;        
     end;
 end    
@@ -55,12 +59,20 @@ if (~isempty(LSprob.vtype))
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 end;
 
-if opts.outFormat == 0,
-   [nErr]=mxlindo('LSwriteMPSFile',imodel,szOutFile,LS_UNFORMATTED_MPS);
-else 
+if LSopts.outFormat == 0,
+   [nErr]=mxlindo('LSwriteMPSFile',imodel,szOutFile,LS_UNFORMATTED_MPS);   
+elseif LSopts.outFormat == 1, 
    [nErr]=mxlindo('LSwriteLINDOFile',imodel,szOutFile);
+elseif LSopts.outFormat == -1,
+    model = LMprob2mat(LSprob);
+    save(szOutFile,'model');
 end;
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
+if nErr ~= LSERR_NO_ERROR, 
+    LMcheckError(iEnv,nErr) ; 
+    return; 
+else
+    fprintf('Written model %s.\n',szOutFile);
+end;
  
 % Un-hook
 [nErr]=mxlindo('LSdeleteModel',imodel);

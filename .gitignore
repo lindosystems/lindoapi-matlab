@@ -1,4 +1,6 @@
 # Backups
-.*~
-.bak
+*.*~
+*.bak
+*.sav
+*.asv
 prv/*
