@@ -73,17 +73,7 @@ function [x,fval,exitflag,output,lambda]=LMlinprog(f,A,b,Aeq,beq,lb,ub,x0,option
 
 %%
 lindo;
-defaultopt = {};
-defaultopt.Algorithm= 'dual-simplex';
-defaultopt.Diagnostics= 'off';
-defaultopt.Display= 'iter';
-defaultopt.LargeScale= 'on';
-defaultopt.MaxIter= 2147483648;
-defaultopt.MaxTime= 99999;
-defaultopt.Preprocess= 'basic';
-defaultopt.Simplex= 'off';
-defaultopt.TolCon= 1e-7;
-defaultopt.TolFun= 1e-7;
+defaultopt = LMoptions('linprog');
 
 if nargin==1 && nargout <= 1 && isequal(f,'defaults')
    x = defaultopt;
@@ -122,7 +112,8 @@ output.firstorderopt = [];
 output.algorithm = ''; % not known at this stage
 output.cgiterations = [];
 output.message = ''; % not known at this stage
-   
+
+% Detect problem structure input
 if ( nargin == 1)
    model = f;
    if ( ~isstruct(model) ),
@@ -130,13 +121,13 @@ if ( nargin == 1)
        warning(output.message);
        return; 
    end
-
+   
    if ( ~all(isfield(model, {'f','Aineq','bineq'})) )
       output.message = 'The structure input to LMlinprog should contain at least three fields. "f", "Aineq" and "bineq".';
       warning(output.message);
       return; 
    end
-
+   
    f = model.f;
    A = model.Aineq; 
    b = model.bineq; 
@@ -167,6 +158,7 @@ elseif nargin<3,
    return;    
 end
 
+
 % Set up LSprob structure
 LSprob = {};
 LSprob.vtype = [];
@@ -185,10 +177,10 @@ csense_le=repmat('L',1,mineq);
 csense_eq=repmat('E',1,meq);
 LSprob.csense = [csense_le csense_eq];
 if isempty(lb),
-    lb = -ones(n)*LS_INFINITY;
+    lb = -ones(n,1)*LS_INFINITY;
 end
 if isempty(ub),
-    ub = ones(n)*LS_INFINITY;
+    ub = ones(n,1)*LS_INFINITY;
 end
 linfx = find(lb==-inf);
 uindx = find(ub==inf);

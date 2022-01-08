@@ -1,7 +1,7 @@
 function [nErr] = LMwritem(szOutFile,LSprob,LSopts)
 % LMWRITEM: Export a model in matrix form in MPS or LINDO format.
 %
-% Usage:  [nErr] =LMwritem(szOutFile,LSprob,opts)
+% Usage:  [nErr] =LMwritem(szOutFile,LSprob,LSopts)
 %
 % Copyright (c) 2001-2007
 %
@@ -20,9 +20,7 @@ if nargin<1
 end
 
 if nargin < 3,
-    LSopts={};
-    LSopts.iDefaultLog=1;
-    LSopts.outFormat=0;
+    LSopts=LMoptions('lindo');
     if nargin <2,
        fprintf('LMwritem requires at least two arguments\n');
        return;        
@@ -59,11 +57,11 @@ if (~isempty(LSprob.vtype))
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 end;
 
-if LSopts.outFormat == 0,
+if strcmp(LSopts.outFormat,'mps'),
    [nErr]=mxlindo('LSwriteMPSFile',imodel,szOutFile,LS_UNFORMATTED_MPS);   
-elseif LSopts.outFormat == 1, 
+elseif strcmp(LSopts.outFormat,'ltx'), 
    [nErr]=mxlindo('LSwriteLINDOFile',imodel,szOutFile);
-elseif LSopts.outFormat == -1,
+elseif strcmp(LSopts.outFormat,'mat'),
     model = LMprob2mat(LSprob);
     save(szOutFile,'model');
 end;

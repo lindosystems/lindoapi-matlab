@@ -1,4 +1,4 @@
-function  [x,y,s,d,rx,rs,pobj,nErr] = LMsolvef(szInputFile,nMethod,iDefaultLog)
+function  [x,y,s,dj,rx,rs,pobj,nErr,xsol] = LMsolvef(szInputFile,LSopts)
 % LMSOLVEF: Read and solve LP/QP/MIP/MIQP models with LINDO API. 
 % The input model is assumed to be in the following generic form. 
 % Extended MPS format supports quadratic forms, but LINDO file
@@ -14,7 +14,7 @@ function  [x,y,s,d,rx,rs,pobj,nErr] = LMsolvef(szInputFile,nMethod,iDefaultLog)
 %     c, x and A(i,:) are n-vectors, and "?" is one of the relational 
 %     operators "<=", "=", or ">=".
 % 
-% Usage:  [x,y,s,d,pobj,nErr] = LMsolvef(szInputFile,nMethod,iDefaultLog)
+% Usage:  [x,y,s,d,pobj,nErr,xsol] = LMsolvef(szInputFile,LSopts)
 % 
 % Copyright (c) 2006
 %
@@ -30,16 +30,16 @@ global MY_LICENSE_FILE
 lindo;
 
 CTRLC=0
-if nargin < 3
-   iDefaultLog = 13;
-   if nargin < 2
-      nMethod = 0;
-   end;
+if nargin < 2, 
+    LSopts={};
 end;
+LSopts = LMoptions('lindo',LSopts);
+LSopts = LMoptions('linprog',LSopts);
+LSopts = LMoptions('intlinprog',LSopts);
 
 % initialize the output
 x=[];y=[];
-s=[];d=[];
+s=[];dj=[];
 pobj=[]; nErr=[];
 
 
@@ -68,13 +68,12 @@ if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 %%
 % Open a log channel if required
 %%
-if (iDefaultLog>0)
+if (LSopts.iDefaultLog>0)
    [nErr] = mxlindo('LSsetLogfunc',iModel,'LMcbLog','Dummy string');
    if nErr ~= LSERR_NO_ERROR, return; end;
-   %[nErr] = mxlindo('LSsetCallback',iModel,'LMcbLP','dummy');   
-   %if nErr ~= LSERR_NO_ERROR, return; end;   
 end;
-
+[nErr] = mxlindo('LSsetCallback',iModel,'LMcbLP2','dummy');   
+if nErr ~= LSERR_NO_ERROR, return; end;   
 
 %%
 % Read the MPS/LINDO file into the model. 
@@ -95,71 +94,27 @@ if (nErr)
    end;         
 end; 
 
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_LP_PRELEVEL,0);
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SPLEX_ITRLMT,1000);
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SPLEX_SCALE,0);
-[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLVER_IUSOL,1);  
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLVER_IPMSOL,1);   
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLVER_TIMLMT,3);
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_ITRLIM,-1);   
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_NLP_ITRLMT,1000);   
-%[nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_SOLVER_FEASTOL,1.0e-10);  
-%[nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_SOLVER_OPTTOL,1.0e-10);  
-%[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_PROB_TO_SOLVE,LS_PROB_SOLVE_DUAL);
-[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_PRINTLEVEL,iDefaultLog);        
-[nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_LP_PRINTLEVEL,iDefaultLog);        
-%[nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_CALLBACKFREQ,0.5);      
-%[nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_MIP_RELOPTTOL,0.01);      
+% Set LSopts as model parameters
+ lm_set_options; %(iEnv, iModel, LSopts, isMip);
 
-%% 
-% Get model stats (dimension, variable types etc..)
-%%
-
-[n,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_VARS);  
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-[m,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_CONS);  
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-[ni,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_INT);  
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-[nb,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_BIN);  
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-[nz,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_NONZ);  
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-
-if ~iDefaultLog,
-  fprintf(' \n');           
-  fprintf('      Variables  : %12d                 Nonzeroes : %12d\n',n,nz);    
-  fprintf('      Constraints: %12d                 Density   : %12g\n',m,nz/m/n);
-end;
-
-
-opts={};
-opts.nMethod=LS_METHOD_FREE;
-opts.iDefaultLog=iDefaultLog;
-
-
-%%Invoke the LP/MIP solvers
+[n,m,ni,nb,nz] = lm_stat_model(iModel,1);
+%% Invoke the LP/MIP solvers
 %
 if (nb+ni<1)
-   [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts);  
-   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
+   [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);  
+   [xsol,nErr] = lm_stat_lpsol(iModel);
 else     
-   [x,y,s,d,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel, iDefaultLog, nMethod);
-   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
+   [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);
+   [xsol,nErr] = lm_stat_mipsol(iModel);
 end;
 
-if (0),
-	basfile=strrep(szInputFile,'.mps','_bas.mps');
-	[nErr] = mxlindo ('LSwriteBasis',iModel,basfile,2);
-   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-end;
+xsol.nStatus = nStatus;
+xsol.optErr = optErr;
+[xsol.errmsg, nErr] = mxlindo('LSgetErrorMessage',iEnv,optErr);
+if optErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,optErr); end;
 
-if 0,
-	[nErr] = mxlindo ('LSwriteSolution',iModel,[szInputFile '.sol']);
-   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-end;
 
-% Delete the LINDO environment/model
+%% Delete the LINDO environment/model
 [nErr]=mxlindo('LSdeleteModel',iModel);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 

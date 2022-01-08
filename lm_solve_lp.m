@@ -1,4 +1,4 @@
-function [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts)
+function [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, LSopts)
 % lm_solve_lp: Local LP/QP/NLP driver routine for LINDO API
 %
 % Copyright (c) 2001-2007
@@ -15,19 +15,13 @@ function [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel, opts)
 lindo;
    
 if nargin < 3, 
-    opts={};
-    opts.nMethod=LS_METHOD_FREE;
-    opts.iDefaultLog=1;
-    opts.presolve=1;
-    opts.B = [];
+    LSopts={};
 end;
-if ~isfield(opts,'nMethod'), opts.nMethod=LS_METHOD_FREE; end
-if ~isfield(opts,'iDefaultLog'), opts.iDefaultLog=1; end
-if ~isfield(opts,'presolve'), opts.presolve=1; end
-if ~isfield(opts,'B'), opts.B=[]; end
+LSopts=LMoptions('lindo',LSopts);
+LSopts=LMoptions('linprog',LSopts);
 
-iDefaultLog = opts.iDefaultLog;
-nMethod = opts.nMethod;
+iDefaultLog = LSopts.iDefaultLog;
+nMethod = LSopts.nMethod;
 
    if iDefaultLog==-1,
        fprintf('\n%10s %15s %15s %15s %15s\n','ITER','PRIMAL_OBJ','DUAL_OBJ','PRIMAL_INF','DUAL_INF');              
@@ -47,8 +41,8 @@ nMethod = opts.nMethod;
    rx=[];   % primal extreme ray
    rs=[];   % slacks associated with rx
    
-   if isfield(opts,'B') && ~isempty(opts.B),
-       nErr = mxlindo('LSloadBasis',iModel,opts.B.cbas,opts.B.rbas);
+   if isfield(LSopts,'B') && ~isempty(LSopts.B),
+       nErr = mxlindo('LSloadBasis',iModel,LSopts.B.cbas,LSopts.B.rbas);
        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
    end
    
@@ -61,31 +55,31 @@ nMethod = opts.nMethod;
        lm_stat_lpsol;      
    end;
 
-   if nStatus==LS_STATUS_BASIC_OPTIMAL | nStatus==LS_STATUS_OPTIMAL | nStatus==LS_STATUS_FEASIBLE | LS_STATUS_UNBOUNDED | nStatus==LS_STATUS_LOCAL_OPTIMAL,
+   if nStatus==LS_STATUS_BASIC_OPTIMAL || nStatus==LS_STATUS_OPTIMAL || ...
+      nStatus==LS_STATUS_FEASIBLE || nStatus==LS_STATUS_LOCAL_OPTIMAL,
 	   % Get primal and dual solution   
        [pobj, nErr] = mxlindo('LSgetInfo',iModel,LS_DINFO_POBJ);
+       if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
        
        [x,nErr]=mxlindo('LSgetPrimalSolution',iModel);
        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
        [y,nErr]=mxlindo('LSgetDualSolution',iModel);
        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
-       
-       if nStatus==LS_STATUS_UNBOUNDED,
-        [rx,rs,pobj,nErr]=mxlindo('LSgetExtremeRay',iModel);      
-        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
-       end;
-	  	  
+       	  	  
 	   [s,nErr]=mxlindo('LSgetSlacks',iModel);
 	   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
        
        [d,nErr]=mxlindo('LSgetReducedCosts',iModel);   
        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;	   
 
-	   if nStatus==LS_STATUS_BASIC_OPTIMAL | nStatus==LS_STATUS_UNBOUNDED,
-		   [cstat,rstat,nErr] = mxlindo('LSgetBasis',iModel);
-		   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
-	   end;
+   elseif nStatus==LS_STATUS_UNBOUNDED,
+        [rx,rs,pobj,nErr]=mxlindo('LSgetExtremeRay',iModel);      
+        if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
    end;
-               
+
+   if nStatus==LS_STATUS_BASIC_OPTIMAL || nStatus==LS_STATUS_UNBOUNDED,
+       [cstat,rstat,nErr] = mxlindo('LSgetBasis',iModel);
+       if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
+   end;   
 return;
 
