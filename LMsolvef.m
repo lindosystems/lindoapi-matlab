@@ -43,41 +43,33 @@ s=[];dj=[];
 pobj=[]; nErr=[];
 
 
-%%
-% Read license key from a license file
-%%
+%% Read license key from a license file
 [MY_LICENSE_KEY,nErr] = mxlindo('LSloadLicenseString',MY_LICENSE_FILE);
 
-%%
-% Create a LINDO environment and a model
-%%
+%% Create a LINDO environment and a model
 [iEnv,nErr]=mxlindo('LScreateEnv',MY_LICENSE_KEY);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 cleanupObj=onCleanup(@() myCleanupFun(iEnv));
 
-%[nErr]=mxlindo('LSsetEnvIntParameter',iEnv,LS_IPARAM_SOLVER_TIMLMT,5);
-%[nErr]=mxlindo('LSsetEnvIntParameter',iEnv,LS_IPARAM_SPLEX_SCALE,0);
-%[nErr]=mxlindo('LSsetEnvDouParameter',iEnv,LS_DPARAM_MIP_INTTOL,0.0);
-%[nErr]=mxlindo('LSsetEnvDouParameter',iEnv,LS_DPARAM_MIP_RELINTTOL,0.0);
+% Set LSopts as env parameters
+if LSopts.setEnvParams,
+    [nOk,nFail] = lm_set_options(iEnv, iEnv, LSopts);
+end
 
-
-
+%% Declare and create model
 [iModel,nErr]=mxlindo('LScreateModel',iEnv);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 
-%%
-% Open a log channel if required
-%%
+%% Open a log channel if required
 if (LSopts.iDefaultLog>0)
    [nErr] = mxlindo('LSsetLogfunc',iModel,'LMcbLog','Dummy string');
    if nErr ~= LSERR_NO_ERROR, return; end;
 end;
+% Set a dummy callback to track progress and serve CTRL-C requests
 [nErr] = mxlindo('LSsetCallback',iModel,'LMcbLP2','dummy');   
 if nErr ~= LSERR_NO_ERROR, return; end;   
 
-%%
-% Read the MPS/LINDO file into the model. 
-%%
+%% Read the MPS/LINDO file into the model. 
 [nErr]=mxlindo('LSreadMPSFile',iModel,szInputFile,LS_UNFORMATTED_MPS);
 if (nErr)
    [nErr]=mxlindo('LSreadMPSFile',iModel,szInputFile,LS_FORMATTED_MPS);         
@@ -94,13 +86,15 @@ if (nErr)
    end;         
 end; 
 
-% Set LSopts as model parameters
- lm_set_options; %(iEnv, iModel, LSopts, isMip);
-
 [n,m,ni,nb,nz] = lm_stat_model(iModel,1);
+isMip = ni+nb>0;
+
+% Set LSopts as model parameters
+[nOk,nFail] = lm_set_options(iEnv, iModel, LSopts, isMip);
+
+
 %% Invoke the LP/MIP solvers
-%
-if (nb+ni<1)
+if (isMip==0),
    [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);  
    [xsol,nErr] = lm_stat_lpsol(iModel);
 else     
@@ -108,6 +102,7 @@ else
    [xsol,nErr] = lm_stat_mipsol(iModel);
 end;
 
+% Record termination status and optimization error
 xsol.nStatus = nStatus;
 xsol.optErr = optErr;
 [xsol.errmsg, nErr] = mxlindo('LSgetErrorMessage',iEnv,optErr);

@@ -120,28 +120,29 @@ objconst = 0;
 %% Read license key from a license file
 [MY_LICENSE_KEY,nErr] = mxlindo('LSloadLicenseString',MY_LICENSE_FILE);
 
-% Create a LINDO environment
+%% Create a LINDO environment
 [iEnv,nErr]=mxlindo('LScreateEnv',MY_LICENSE_KEY);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 onCleanup(@() myCleanupFun(iEnv));
 
 % Set LSopts as env parameters
-%if LSopts.setEnvParams,
-%    lm_set_options(iEnv, iEnv, LSopts, isMip);
-%end    
+if LSopts.setEnvParams,
+    [nOk,nFail] = lm_set_options(iEnv, iEnv, LSopts, isMip);
+end    
 
-% Declare and create a model 
+%% Declare and create a model 
 [iModel,nErr]=mxlindo('LScreateModel',iEnv);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 
 % Set LSopts as model parameters
-%lm_set_options; %(iEnv, iModel, LSopts, isMip);
+[nOk,nFail] = lm_set_options(iEnv, iModel, LSopts, isMip);
 
-% Open a log channel if required
+%% Open a log channel if required
 if (LSopts.iDefaultLog>0)
    [nErr] = mxlindo('LSsetLogfunc',iModel,'LMcbLog','Dummy string');
    if nErr ~= LSERR_NO_ERROR, return; end;
 end;
+% Set a dummy callback to track progress and serve CTRL-C requests
 [nErr] = mxlindo('LSsetCallback',iModel,'LMcbLP2','dummy');
 
 % Load LP the data 
@@ -172,8 +173,7 @@ end
 xsol=[];
 if (isMip == 0)
    [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
-   B.cbas=[];B.rbas=[];   
-   [xsol,nErr] = lm_stat_lpsol(iModel);
+   B.cbas=[];B.rbas=[];      
    if LSopts.numAltOpt>0,
        if nStatus==LS_STATUS_BASIC_OPTIMAL,
             nErr = mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLPOOL_LIM,LSopts.numAltOpt+1);
@@ -182,11 +182,13 @@ if (isMip == 0)
            fprintf('\nError: cannot compute alternative solutions when status=%d..\n',nStatus);
        end
    end
+   [xsol,nErr] = lm_stat_lpsol(iModel);
 else
    [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
    [xsol,nErr] = lm_stat_mipsol(iModel);
 end;
 
+% Record termination status and optimization error
 xsol.nStatus = nStatus;
 xsol.optErr = optErr;
 [xsol.errmsg, nErr] = mxlindo('LSgetErrorMessage',iEnv,optErr);
