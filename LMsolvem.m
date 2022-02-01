@@ -172,7 +172,7 @@ end
 
 xsol=[];
 if (isMip == 0)
-   [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
+   [x,y,s,dj,~,~,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
    B.cbas=[];B.rbas=[];      
    if LSopts.numAltOpt>0,
        if nStatus==LS_STATUS_BASIC_OPTIMAL,
@@ -182,16 +182,16 @@ if (isMip == 0)
            fprintf('\nError: cannot compute alternative solutions when status=%d..\n',nStatus);
        end
    end
-   [xsol,nErr] = lm_stat_lpsol(iModel);
+   [xsol,~] = lm_stat_lpsol(iModel);
 else
    [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
-   [xsol,nErr] = lm_stat_mipsol(iModel);
+   [xsol,~] = lm_stat_mipsol(iModel);
 end;
 
 % Record termination status and optimization error
 xsol.nStatus = nStatus;
 xsol.optErr = optErr;
-[xsol.errmsg, nErr] = mxlindo('LSgetErrorMessage',iEnv,optErr);
+[xsol.errmsg, ~] = mxlindo('LSgetErrorMessage',iEnv,optErr);
 if optErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,optErr); end;
 
 if LSopts.saveBas,

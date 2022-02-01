@@ -92,7 +92,9 @@ isMip = ni+nb>0;
 % Set LSopts as model parameters
 [nOk,nFail] = lm_set_options(iEnv, iModel, LSopts, isMip);
 
-
+szParamFile=strrep(szInputFile,'.mps','.par');
+szParamFile=strrep(szParamFile,'.gz','');
+[~]=mxlindo('LSwriteModelParameter',iModel,szParamFile);   
 %% Invoke the LP/MIP solvers
 if (isMip==0),
    [x,y,s,dj,rx,rs,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);  

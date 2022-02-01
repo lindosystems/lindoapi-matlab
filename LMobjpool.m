@@ -60,7 +60,8 @@ if (iDefaultLog > 0),
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); return; end;
 end;
 
-nErr = mxlindo('LSreadMPIFile',iModel,'c:\tmp\assign5.mpi');
+mpiFile = [getenv('LINDOAPI_HOME')  '\samples\c\ex_objlex\assign5.mpi'];
+nErr = mxlindo('LSreadMPIFile',iModel,mpiFile);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); return; end;
 
 [n,nErr]=mxlindo('LSgetInfo',iModel,LS_IINFO_NUM_VARS);  
@@ -75,7 +76,7 @@ nErr = mxlindo('LSaddObjPool',iModel,padC2,LS_MIN,1,1e-7);
 
 if n>nc,
     % Optimize model
-    [x,y,s,d,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel);
+    [x,y,s,dj,pobj,nStatus,nErr] = lm_solve_mip(iEnv, iModel);
     if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
     lm_stat_mipsol(iModel,iDefaultLog);
 
@@ -93,9 +94,9 @@ if n>nc,
     X=[X x];
 else
 % Optimize model
-    [x,y,s,d,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel);
+    [x,y,s,d,rx,rs,pobj,nStatus,nErr] = lm_solve_lp(iEnv, iModel);
     if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-    lm_stat_mipsol(iModel,iDefaultLog);
+    lm_stat_lpsol(iModel,iDefaultLog);
 
     X=[];
     nErr = mxlindo('LSloadSolutionAt',iModel,0,0);
