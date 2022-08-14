@@ -1,4 +1,4 @@
-function [LSprob] = LMreadf(szInputFile,dropMethod,dropArg)
+function [LSprob] = LMreadf(szInputFile,dropMethod,dropCount)
 % LMREADF: Read an LP/QP/MIP/MIQP problem in (extended) MPS or LINDO format, 
 % and return the associated data objects characterizing the model. The input
 % model is assumed to be in the following generic form.
@@ -48,7 +48,7 @@ if nargin<1
 end	
 
 if nargin<2, dropMethod=-1; end;
-if nargin<3, dropArg=-1; end;
+if nargin<3, dropCount=-1; end;
 LTF = 0; % Convert to lower triangular form
 c = []; A = []; b = [];
 lb = []; ub=[]; csense=[];vtype=[];
@@ -171,13 +171,14 @@ if dropMethod>0,
     R.padRidx = padRidx;
     R.padCrnk = padCrnk;
     R.padRrnk = padRrnk;
+    LSprob.R = R
     
 
     if dropMethod==1,
-        cnt = dropArg; %floor(m*.01/50)+1;
+        cnt = dropCount; %floor(m*.01/50)+1;
         LSprob.R = myKeepDrop_nzcnt(LSprob,cnt);
     elseif dropMethod==2,
-        LSprob.R = myKeepDrop_nzmaxpercol(LSprob,dropArg);
+        LSprob.R = myKeepDrop_nzmaxpercol(LSprob,dropCount);
     end
 end
 
