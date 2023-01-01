@@ -40,9 +40,9 @@ if nargin<7,
                 %iVarControl = LS_MONTECARLO;
                 %iVarControl = LS_ANTITHETIC;               
                 if nargin<3,
-                    nSampSize = 50;                    
+                    nSampSize = 10;                    
                     if nargin < 2,
-                        dPar=[1 1];
+                        dPar=[5 2];
                         if nargin < 1,
                             szDistType='no';
                         end;
