@@ -194,14 +194,28 @@ xsol.optErr = optErr;
 [xsol.errmsg, ~] = mxlindo('LSgetErrorMessage',iEnv,optErr);
 if optErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,optErr); end;
 
+szInputFile=[];
+if isfield(LSprob,'szInputFile'), 
+    szInputFile = LSprob.szInputFile; 
+    [fPath, fName, fExt] = fileparts(szInputFile);
+end
+
 if LSopts.saveBas,
-	basfile=strrep(szInputFile,'.mps','_bas.mps');
+    if ~isempty(szInputFile),
+        basfile=strrep(szInputFile,fExt,'_bas.mps');
+    else
+        basfile='/tmp/mymodel.bas';
+    end
 	[nErr] = mxlindo ('LSwriteBasis',iModel,basfile,2);
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
 end;
 
 if LSopts.saveSol,
-    solfile=strrep(szInputFile,'.mps','.sol');
+    if ~isempty(szInputFile),
+        solfile=strrep(szInputFile,fExt,'.sol');
+    else
+        solfile='/tmp/mymodel.sol';
+    end
 	[nErr] = mxlindo ('LSwriteSolution',iModel,solfile);
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
 end;

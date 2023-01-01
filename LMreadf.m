@@ -120,9 +120,10 @@ LSprob.QCvar1 = QCvar1;
 LSprob.QCvar2 = QCvar2;
 LSprob.QCcoef = QCcoef;
 LSprob.oshift = oshift;
-
-solFile = strrep(szInputFile,'.mps','.sol');
-if exist(solFile, 'file') == 2    
+[fPath, fName, fExt] = fileparts(szInputFile);
+solFile = strrep(szInputFile,fExt,'.sol');
+if exist(solFile, 'file') == 2,
+    fprintf('Trying to read initial solution at %s\n',solFile);
     errorcode = mxlindo('LSreadVarStartPoint',iModel,solFile);
     if errorcode==0,    
         [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);
