@@ -179,7 +179,7 @@ Xalt=[];
 if (isMip == 0)
    [x,y,s,dj,~,~,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
    B.cbas=[];B.rbas=[];
-   if LSopts.numAltOpt>0,
+   if isfield(LSopts,'numAltOpt') && LSopts.numAltOpt>0,
        if nStatus==LS_STATUS_BASIC_OPTIMAL,
             nErr = mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLPOOL_LIM,LSopts.numAltOpt+1);
             nErr = LMfindAltOpt(iEnv,iModel,LSopts);
@@ -236,7 +236,7 @@ if isfield(LSprob,'InputFile'),
     [fPath, fName, fExt] = fileparts(szInputFile);
 end
 
-if LSopts.saveBas,
+if isfield(LSopts,'saveBas') && LSopts.saveBas,
     if ~isempty(szInputFile),
         basfile=strrep(szInputFile,fExt,'_bas.mps');
     else
@@ -247,7 +247,7 @@ if LSopts.saveBas,
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;   
 end;
 
-if LSopts.saveSol,
+if isfield(LSopts,'saveSol') && LSopts.saveSol,
     if ~isempty(szInputFile),
         solfile=strrep(szInputFile,fExt,'.sol');
     else
