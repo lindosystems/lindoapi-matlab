@@ -54,8 +54,8 @@ xsol=[];
 
 if nargin < 2, 
     LSopts={};
+    LSopts = LMoptions('lindo',LSopts);
 end;
-LSopts = LMoptions('lindo',LSopts);
 LSopts = LMoptions('linprog',LSopts);
 LSopts = LMoptions('intlinprog',LSopts);
 
@@ -125,8 +125,12 @@ objconst = 0;
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 onCleanup(@() myCleanupFun(iEnv));
 
+if 0>1,
+    nErr = mxlindo('LSsetXSolverLibrary',iEnv,LS_XSOLVER_HIGHS,'highs.dll');
+    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; end;
+end
 % Set LSopts as env parameters
-if LSopts.setEnvParams,
+if isfield(LSopts,'setEnvParams') & LSopts.setEnvParams,
     [nOk,nFail] = lm_set_options(iEnv, iEnv, LSopts, isMip);
 end    
 
@@ -169,11 +173,12 @@ if 0>1,
     szTmp = sprintf('/tmp/obj.ltx',pobj);
     nErr = mxlindo('LSwriteLINDOFile',iModel,szTmp);
 end
-
+   
 xsol=[];
+Xalt=[];
 if (isMip == 0)
    [x,y,s,dj,~,~,pobj,nStatus,optErr] = lm_solve_lp(iEnv, iModel, LSopts);       
-   B.cbas=[];B.rbas=[];      
+   B.cbas=[];B.rbas=[];
    if LSopts.numAltOpt>0,
        if nStatus==LS_STATUS_BASIC_OPTIMAL,
             nErr = mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SOLPOOL_LIM,LSopts.numAltOpt+1);
@@ -183,26 +188,58 @@ if (isMip == 0)
        end
    end
    [xsol,~] = lm_stat_lpsol(iModel);
+   [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);    
+   xsol.B = B;
 else
    [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
    [xsol,~] = lm_stat_mipsol(iModel);
+   if nStatus == LS_STATUS_OPTIMAL | nStatus == LS_STATUS_FEASIBLE,        
+       [padPrimalRound,padObjRound,padPfeasRound,pnstatus,nErr] = mxlindo('LSgetRoundMIPsolution',iModel,x,1,0);
+       fprintf('\nObjRound=%12.6f, PfeasRound=%12.6f, pnstatus=%d, nErr=%d\n',padObjRound,padPfeasRound,pnstatus,nErr);
+       k = 0;
+       while k<LSopts.numAltOpt,
+           [pnstatus,nErr] = mxlindo('LSgetNextBestMIPSol',iModel);
+           k = k + 1;
+           if nErr==0,
+               [x,nErr]=mxlindo('LSgetMIPPrimalSolution',iModel);
+               [padPrimalRound,padObjRound,padPfeasRound,pnstatus,nErr] = mxlindo('LSgetRoundMIPsolution',iModel,x,1,0);
+               fprintf('\nObjRound=%12.6f, PfeasRound=%12.6f, pnstatus=%d, nErr=%d\n',padObjRound,padPfeasRound,pnstatus,nErr);
+               Xalt = [Xalt x];
+           else
+               fprintf('\nLSgetNextBestMIPSol returned error %d, stopping..\n',nErr);
+               break;
+           end           
+       end
+       if k>0,
+           if isfield(LSprob,'InputFile'),
+                szOutFile =  [LSprob.InputFile(1:length(LSprob.InputFile)-4) '_contra.mps'];
+               [nErr]=mxlindo('LSwriteMPSFile',iModel,szOutFile,0);
+               fprintf('\nSaved final state of kbest model as %s\n',szOutFile);                
+           else
+               fprintf('\nWarning: LSprob.InputFile does not exist, cannot save final state of kbest model\n');
+           end
+       end
+   end
 end;
 
+xsol.Xalt = Xalt;
 % Record termination status and optimization error
 xsol.nStatus = nStatus;
 xsol.optErr = optErr;
 [xsol.errmsg, ~] = mxlindo('LSgetErrorMessage',iEnv,optErr);
 if optErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,optErr); end;
 
-if LSopts.saveBas,
-	basfile=strrep(szInputFile,'.mps','_bas.mps');
+if LSopts.saveBas,    
+    basfile= [LSprob.InputFile(1:length(LSprob.InputFile)-4) '.bas'];
 	[nErr] = mxlindo ('LSwriteBasis',iModel,basfile,2);
-   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
+    fprintf('\n');
+   if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;   
 end;
 
 if LSopts.saveSol,
-    solfile=strrep(szInputFile,'.mps','.sol');
+    solfile= [LSprob.InputFile(1:length(LSprob.InputFile)-4) '.sol~'];
 	[nErr] = mxlindo ('LSwriteSolution',iModel,solfile);
+    fprintf('\n');
    if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr); end;
 end;
 

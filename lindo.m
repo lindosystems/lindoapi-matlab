@@ -158,6 +158,7 @@
  LS_XSOLVER_SOP                                               = 11;
  LS_XSOLVER_CBC                                               = 12;
  LS_XSOLVER_XPR                                               = 13;
+ LS_XSOLVER_HIGHS                                             = 14;
  LS_XSOLVER_XLINDO                                            = 99;
 
  % ref types %/

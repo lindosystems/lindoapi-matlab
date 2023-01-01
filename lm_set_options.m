@@ -27,6 +27,7 @@ end
 
 nOk=0; nFail=0;
 dgOn = strcmp(LSopts.Diagnostics,'on');
+LSopts = LMoptions('lindo',LSopts);
 
 if LSopts.SCALE>=0,
     [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SPLEX_SCALE,LSopts.SCALE);
@@ -67,7 +68,11 @@ if isMip>0,
     [nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_MIP_ABSOPTTOL,LSopts.TolGapAbs);
     if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;
     [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_PRINTLEVEL,LSopts.iDefaultLog);
-    if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;
+    if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;    
+    if LSopts.FP_MODE>-1,
+        [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_FP_MODE,LSopts.FP_MODE);
+        if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;    
+    end
 end;    
 
 if LSopts.IUSOL>=0,

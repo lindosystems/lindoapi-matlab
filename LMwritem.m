@@ -57,7 +57,14 @@ if (~isempty(LSprob.vtype))
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 end;
 
-if strcmp(LSopts.outFormat,'mps'),
+if strfind(szOutFile,'.mps'),
+    [nErr]=mxlindo('LSwriteMPSFile',imodel,szOutFile,LS_UNFORMATTED_MPS);   
+elseif strfind(szOutFile,'.ltx'),
+    [nErr]=mxlindo('LSwriteLINDOFile',imodel,szOutFile);
+elseif strfind(szOutFile,'.map'),
+    model = LMprob2mat(LSprob);
+    save(szOutFile,'model');
+elseif strcmp(LSopts.outFormat,'mps'),
    [nErr]=mxlindo('LSwriteMPSFile',imodel,szOutFile,LS_UNFORMATTED_MPS);   
 elseif strcmp(LSopts.outFormat,'ltx'), 
    [nErr]=mxlindo('LSwriteLINDOFile',imodel,szOutFile);

@@ -68,7 +68,8 @@ elseif strcmp(which,'lindo'),
     if ~isfield(LSopts,'saveBas'), LSopts.saveBas=0; end  
     if ~isfield(LSopts,'saveSol'), LSopts.saveSol=0; end  
     if ~isfield(LSopts,'SCALE'), LSopts.SCALE=-1; end 
-    if ~isfield(LSopts,'CBFREQ'), LSopts.CBFREQ=-1; end     
+    if ~isfield(LSopts,'CBFREQ'), LSopts.CBFREQ=-1; end   
+    if ~isfield(LSopts,'FP_MODE'), LSopts.FP_MODE=-1; end   
 else
     fprintf('Solver type is not recognized\n');
     return;
