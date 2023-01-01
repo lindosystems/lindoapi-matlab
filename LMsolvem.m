@@ -506,8 +506,8 @@ if optErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,optErr); end;
 
 
 szInputFile=[];
-if isfield(LSprob,'szInputFile'), 
-    szInputFile = LSprob.szInputFile; 
+if isfield(LSprob,'InputFile'), 
+    szInputFile = LSprob.InputFile; 
     [fPath, fName, fExt] = fileparts(szInputFile);
 end
 
