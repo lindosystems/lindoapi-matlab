@@ -1,13 +1,13 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%
- %%    LINDO API Version 13.0
- %%    Copyright (c) 2000-2020
+ %%    LINDO API Version 14.0
+ %%    Copyright (c) 2000-2022
  %%
  %%    LINDO Systems, Inc.            312.988.7422
  %%    1415 North Dayton St.          info@lindo.com
  %%    Chicago, IL 60622              http://www.lindo.com
  %%
- %%    $Id: lindo.m 2958 2020-09-24 11:47:14Z mka $
+ %%    $Id: lindo.m 3043 2022-12-20 20:07:38Z mka $
  %%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
@@ -17,11 +17,11 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
  % Version macros %/
- LS_MAJOR_VER_NUMBER                                          = 13;
+ LS_MAJOR_VER_NUMBER                                          = 14;
  LS_MINOR_VER_NUMBER                                          = 0;
- LS_REV_VER_NUMBER                                            = 183;
- LS_VER_NUMBER                                                = 1300;
- LS_BUILD_VER_NUMBER                                          = 4099;
+ LS_REV_VER_NUMBER                                            = 192;
+ LS_VER_NUMBER                                                = 1400;
+ LS_BUILD_VER_NUMBER                                          = 5099;
 
  LS_MIN                                                       = +1;
  LS_MAX                                                       = -1;
@@ -159,6 +159,7 @@
  LS_XSOLVER_CBC                                               = 12;
  LS_XSOLVER_XPR                                               = 13;
  LS_XSOLVER_HIGHS                                             = 14;
+ LS_XSOLVER_LUA                                               = 98;
  LS_XSOLVER_XLINDO                                            = 99;
 
  % ref types %/
@@ -224,6 +225,7 @@
  LS_IPARAM_FIND_SYMMETRY_LEVEL                                = 1055;
  LS_IPARAM_FIND_SYMMETRY_PRINT_LEVEL                          = 1056;
  LS_IPARAM_TUNER_PRINT_LEVEL                                  = 1057;
+ LS_IPARAM_DEFAULT_SEED                                       = 1058;
 
     % Generic solver parameters (1251 - 1500) %/
  LS_IPARAM_SOLVER_IUSOL                                       = 1251;
@@ -241,6 +243,7 @@
  LS_IPARAM_SOLVER_PARTIALSOL_LEVEL                            = 1263;
  LS_IPARAM_SOLVER_MODE                                        = 1264;
  LS_IPARAM_SOLVER_METHOD                                      = 1265;
+ LS_IPARAM_SOLVER_DUALSOL                                     = 1266;
 
     % Advanced parameters for the simplex method (4000 - 41++) %/
  LS_IPARAM_LP_SCALE                                           = 4029;
@@ -387,6 +390,7 @@
  LS_DPARAM_NLP_CUTOFFOBJ                                      = 2553;
  LS_IPARAM_NLP_USECUTOFFOBJ                                   = 2554;
  LS_IPARAM_NLP_CONIC_REFORM                                   = 2555;
+ LS_IPARAM_NLP_QP_REFORM_LEVEL                                = 2556;
 
     % Mixed integer programming (MIP) parameters (5000 - 5+++) %/
  LS_IPARAM_MIP_TIMLIM                                         = 5300;
@@ -500,6 +504,9 @@
  LS_IPARAM_MIP_SYMMETRY_MODE                                  = 5418;
  LS_IPARAM_MIP_ALLDIFF_METHOD                                 = 5419;
  LS_IPARAM_MIP_SOLLIM                                         = 5420;
+ LS_IPARAM_MIP_FP_PROJECTION                                  = 5421;
+ LS_IPARAM_MIP_SYMMETRY_NONZ                                  = 5422;
+ LS_IPARAM_MIP_FIXINIT_ITRLIM                                 = 5423;
 
     % Global optimization (GOP) parameters (6000 - 6+++) %/
  LS_DPARAM_GOP_RELOPTTOL                                      = 6400;
@@ -1007,6 +1014,8 @@
  EP_LOGABEXPX                                                 = 1186;
  EP_LOGSUMEXP                                                 = 1187;
  EP_LOGSUMAEXP                                                = 1188;
+ EP_EXPMODIV                                                  = 1189;
+ EP_POWERUTILITY                                              = 1190;
 
 
  % Model and solution information codes ( 110xx-140xx) %/
@@ -1088,6 +1097,7 @@
  LS_DINFO_OBJSENSE                                            = 11075;
  LS_DINFO_OBJRELTOL                                           = 11076;
  LS_DINFO_OBJABSTOL                                           = 11077;
+ LS_DINFO_OBJTIMLIM                                           = 11078;
 
  % LP and NLP related info (11200-11299)%/
  LS_IINFO_METHOD                                              = 11200;
@@ -1240,6 +1250,7 @@
  LS_SINFO_GOP_THREAD_LOAD                                     = 11632;
  LS_DINFO_GOP_ABSGAP                                          = 11633;
  LS_DINFO_GOP_RELGAP                                          = 11634;
+ LS_IINFO_GOP_WARNING                                         = 11635;
 
     % Progress info during callbacks %/
  LS_DINFO_SUB_OBJ                                             = 11700;
@@ -2030,6 +2041,7 @@
  LS_METHOD_SBD                                                = 10;
  LS_METHOD_SPRINT                                             = 11;
  LS_METHOD_GA                                                 = 12;
+ LS_METHOD_FILELP                                             = 13;
 
 
  LS_STRATEGY_USER                                             = 0;
@@ -2168,6 +2180,7 @@
  LS_MIP_MODE_FAST_OPTIMALITY                                  = 8;
  LS_MIP_MODE_NO_BRANCH_CUTS                                   = 16;
  LS_MIP_MODE_NO_LP_BARRIER                                    = 32;
+ LS_MIP_MODE_NO_LSLVDP                                        = 64;
 
 
  % Bit mask for cut generation levels. Use sums to
@@ -2187,6 +2200,8 @@
  LS_MIP_BASIS_CUTS                                            = 4096;
  LS_MIP_CARDGUB_CUTS                                          = 8192;
  LS_MIP_DISJUN_CUTS                                           = 16384;
+ LS_MIP_SOFT_KNAP_CUTS                                        = 32768;
+ LS_MIP_LP_ROUND_CUTS                                         = 65536;
 
 
  % Bit masks for MIP preprocessing levels. Use sums
@@ -2466,6 +2481,16 @@
  LS_SOLVER_MODE_POOLEDGE                                      = 2;
    %! scan for integer basic solutions %/
  LS_SOLVER_MODE_INTBAS                                        = 4;
+   %! don't scale lex objectives %/
+ LS_SOLVER_MODE_LEX_NOSCALE                                   = 8;
+   %! relaxed lex-model %/
+ LS_SOLVER_MODE_LEX_RELAXED                                   = 16;
+   %! export each lex-model %/
+ LS_SOLVER_MODE_LEX_EXPEACH                                   = 32;
+   %! export failed lex-model %/
+ LS_SOLVER_MODE_LEX_EXPFAIL                                   = 64;
+   %! resolve failed lex-model %/
+ LS_SOLVER_MODE_LEX_RESOLVEFAIL                               = 128;
 
 
  LS_PARCLASS_BITMASK                                          = 1;

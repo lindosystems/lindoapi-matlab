@@ -44,7 +44,7 @@ if ~isempty(ub_sav),
 end
 LSprob.vtype = vtype;
 LSopts.saveSol = 1;
-
+fprintf('\nFinal optimization\n');
 [x,y,s,dj,pobj,nStatus,nErr,xsol] = LMsolvem(LSprob,LSopts);
 
 %%

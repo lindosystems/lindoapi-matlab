@@ -69,9 +69,6 @@ if nPrintLevel>0,
 end;
 panBinCenters=(padBinLeftEdge+padBinRightEdge)/2;
 
-[nErr]=mxlindo('LSdeleteEnv',iEnv);
-if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
-
 bar(panBinCenters,padBinProbs);
 obsCounts = panBinCounts';
 n = sum(obsCounts);

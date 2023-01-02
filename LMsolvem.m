@@ -193,7 +193,8 @@ if (isMip == 0)
 else
    [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
    [xsol,~] = lm_stat_mipsol(iModel);
-   if nStatus == LS_STATUS_OPTIMAL | nStatus == LS_STATUS_FEASIBLE,        
+   if nStatus == LS_STATUS_OPTIMAL | nStatus == LS_STATUS_FEASIBLE,    
+       fprintf('\nChecking if rounded solution is feasible..\n');
        [padPrimalRound,padObjRound,padPfeasRound,pnstatus,nErr] = mxlindo('LSgetRoundMIPsolution',iModel,x,1,0);
        fprintf('\nObjRound=%12.6f, PfeasRound=%12.6f, pnstatus=%d, nErr=%d\n',padObjRound,padPfeasRound,pnstatus,nErr);
        k = 0;
