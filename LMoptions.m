@@ -70,6 +70,8 @@ elseif strcmp(which,'lindo'),
     if ~isfield(LSopts,'SCALE'), LSopts.SCALE=-1; end 
     if ~isfield(LSopts,'CBFREQ'), LSopts.CBFREQ=-1; end   
     if ~isfield(LSopts,'FP_MODE'), LSopts.FP_MODE=-1; end   
+    if ~isfield(LSopts,'XSOLVER'), LSopts.XSOLVER=0; end   
+    if ~isfield(LSopts,'XDLL'), LSopts.XDLL=''; end   
 else
     fprintf('Solver type is not recognized\n');
     return;

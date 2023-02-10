@@ -125,8 +125,9 @@ objconst = 0;
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 onCleanup(@() myCleanupFun(iEnv));
 
-if 0>1,
-    nErr = mxlindo('LSsetXSolverLibrary',iEnv,LS_XSOLVER_HIGHS,'highs.dll');
+% Set an external solver
+if LSopts.XSOLVER>=1,
+    nErr = mxlindo('LSsetXSolverLibrary',iEnv,LSopts.XSOLVER,LSopts.XDLL);
     if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; end;
 end
 % Set LSopts as env parameters

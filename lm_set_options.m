@@ -100,6 +100,11 @@ if LSopts.CBFREQ>0,
     if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;
 end    
 
+if LSopts.XSOLVER>0,
+    [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_SPLEX_USE_EXTERNAL,LSopts.XSOLVER);   
+    if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;        
+end
+
 if dgOn && nFail,
     fprintf('Warning: lm_set_options failed setting "%d" parameters\n',nFail);
 end
