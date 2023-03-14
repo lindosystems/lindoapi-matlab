@@ -121,9 +121,13 @@ objconst = 0;
 [MY_LICENSE_KEY,nErr] = mxlindo('LSloadLicenseString',MY_LICENSE_FILE);
 
 %% Create a LINDO environment
+LMversion();
 [iEnv,nErr]=mxlindo('LScreateEnv',MY_LICENSE_KEY);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 onCleanup(@() myCleanupFun(iEnv));
+
+% Environment logger
+[nErr] = mxlindo('LSsetEnvLogfunc',iEnv,'LMcbLog','Dummy string');
 
 % Set an external solver
 if LSopts.XSOLVER>=1,

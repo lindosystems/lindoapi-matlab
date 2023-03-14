@@ -7,7 +7,7 @@ LSprob.x = [];
 vtype = LSprob.vtype;
 LSprob.vtype=[];
 
-[x,y,s,dj,pobj,nStatus,nErr,xsol] = LMsolvem(LSprob);
+[x,y,s,dj,pobj,nStatus,nErr,xsol] = LMsolvem(LSprob,LSopts);
 idx = find_roundable_j(x);
 
 pass = 0
@@ -18,13 +18,14 @@ while 1,
         ub_sav = LSprob.ub(idx);
         LSprob.ub(idx) = 0;
         %[idx LSprob.lb(idx) LSprob.ub(idx)]
-    elseif pass>5,
+    end;
+    if pass>5,
         break;        
     end
     [xr,y,s,dj,pobj,nStatus,nErr,xsol] = LMsolvem(LSprob,LSopts);
     if nStatus==2,
         pass = pass + 1;
-        idx = find_roundable_j(x);
+        %idx = find_roundable_j(x);
         %xr(idx)        
     elseif nStatus==3,
         ak = sparse(1,length(x));
@@ -36,7 +37,10 @@ while 1,
     if ~isempty(ub_sav),
         LSprob.ub(idx) = ub_sav;        
     end
-    idx = find_roundable_j(xr);
+    idx = [];
+    if ~isempty(xr),
+        idx = find_roundable_j(xr);
+    end;
 end    
 
 if ~isempty(ub_sav),
@@ -49,4 +53,4 @@ fprintf('\nFinal optimization\n');
 
 %%
 function idx = find_roundable_j(x)
-    idx = find(x>1e-7 & x<1e-4);
+    idx = find(x>5e-7 & x<1e-4);

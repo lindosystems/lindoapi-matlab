@@ -1,3 +1,3 @@
-
+% Display Lindo API version
 [Version,BuiltOn] = mxlindo('LSgetVersionInfo');
-fprintf('LINDO API version %s\n\n',Version);
+fprintf('\nLINDO API version %s (%s)\n',Version,BuiltOn);
