@@ -121,7 +121,9 @@ objconst = 0;
 [MY_LICENSE_KEY,nErr] = mxlindo('LSloadLicenseString',MY_LICENSE_FILE);
 
 %% Create a LINDO environment
-LMversion();
+if LSopts.iDefaultLog>0,
+    LMversion();
+end;    
 [iEnv,nErr]=mxlindo('LScreateEnv',MY_LICENSE_KEY);
 if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; return; end;
 onCleanup(@() myCleanupFun(iEnv));
@@ -193,8 +195,10 @@ if (isMip == 0)
        end
    end
    [xsol,~] = lm_stat_lpsol(iModel);
-   [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);    
-   xsol.B = B;
+   if nStatus==LS_STATUS_BASIC_OPTIMAL,
+       [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);    
+       xsol.B = B;
+   end
 else
    [x,y,s,dj,pobj,nStatus,optErr] = lm_solve_mip(iEnv, iModel, LSopts);        
    [xsol,~] = lm_stat_mipsol(iModel);
