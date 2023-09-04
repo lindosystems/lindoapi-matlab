@@ -69,9 +69,21 @@ if isMip>0,
     if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;
     [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_PRINTLEVEL,LSopts.iDefaultLog);
     if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;    
-    if LSopts.FP_MODE>-1,
+    if isfield(LSopts,'FP_MODE') & LSopts.FP_MODE>-1,
         [nErr]=mxlindo('LSsetModelIntParameter',iModel,LS_IPARAM_MIP_FP_MODE,LSopts.FP_MODE);
         if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;    
+    end
+    if isfield(LSopts,'TolInteger'),
+        [nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_MIP_INTTOL,LSopts.TolInteger);
+        if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;    
+    end
+    if isfield(LSopts,'MIP_INTTOL'),
+        [nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_MIP_INTTOL,LSopts.MIP_INTTOL);
+        if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;
+    end
+    if isfield(LSopts,'MIP_RELINTTOL'),
+        [nErr]=mxlindo('LSsetModelDouParameter',iModel,LS_DPARAM_MIP_RELINTTOL,LSopts.MIP_RELINTTOL);
+        if nErr ~= LSERR_NO_ERROR, if dgOn, LMcheckError(iEnv,nErr); end; nFail = nFail + 1; else nOk = nOk+1; end;        
     end
 end;    
 

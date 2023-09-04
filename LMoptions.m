@@ -72,6 +72,15 @@ elseif strcmp(which,'lindo'),
     if ~isfield(LSopts,'FP_MODE'), LSopts.FP_MODE=-1; end   
     if ~isfield(LSopts,'XSOLVER'), LSopts.XSOLVER=0; end   
     if ~isfield(LSopts,'XDLL'), LSopts.XDLL=''; end   
+    
+elseif strcmp(which,'xxxxx'),
+    global MY_LICENSE_FILE
+    lindo;    
+    [MY_LICENSE_KEY,nErr] = mxlindo('LSloadLicenseString',MY_LICENSE_FILE);
+    [iEnv,nErr]=mxlindo('LScreateEnv',MY_LICENSE_KEY);
+    LMcheckError(iEnv,nErr);
+    LSopts = lm_get_env_options(iEnv, LSopts);
+    [nErr]=mxlindo('LSdeleteEnv',iEnv);
 else
     fprintf('Solver type is not recognized\n');
     return;

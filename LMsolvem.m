@@ -176,9 +176,14 @@ if (exist('QCrows') & exist('QCvar1') & exist('QCvar2') & exist('QCcoef'))
    end;   
 end;
 
-if 0>1,
-    szTmp = sprintf('/tmp/obj.ltx',pobj);
-    nErr = mxlindo('LSwriteLINDOFile',iModel,szTmp);
+if isfield(LSopts,'exportModel'),
+    if strcmp(LSopts.exportModel,'ltx'),
+        szTmp = sprintf('/tmp/iModel.ltx');
+        nErr = mxlindo('LSwriteLINDOFile',iModel,szTmp);
+    elseif strcmp(LSopts.exportModel,'mps'),
+        szTmp = sprintf('/tmp/iModel.mps');
+        nErr = mxlindo('LSwriteMPSFile',iModel,szTmp,0);    
+    end
 end
    
 xsol=[];
@@ -195,7 +200,7 @@ if (isMip == 0)
        end
    end
    [xsol,~] = lm_stat_lpsol(iModel);
-   if nStatus==LS_STATUS_BASIC_OPTIMAL,
+   if nStatus==LS_STATUS_BASIC_OPTIMAL || nStatus==LS_STATUS_OPTIMAL,
        [B.cbas,B.rbas,nErr] = mxlindo('LSgetBasis',iModel);    
        xsol.B = B;
    end
