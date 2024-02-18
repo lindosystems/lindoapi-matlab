@@ -2,7 +2,7 @@
                               mxLINDO 
                     A MATLAB Interface to LINDO API  
          
-                       Copyright (c) 2020
+                       Copyright (c) 2024
   
          LINDO Systems, Inc.           312.988.7422
          1415 North Dayton St.         info@lindo.com
