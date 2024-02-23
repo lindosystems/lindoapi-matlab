@@ -1,8 +1,11 @@
 function LSopts = LMoptions(which,LSopts)
-% LMoptions: Get or update solver 'options' structure
+% LMoptions: Obtain or modify solver 'options' structure
 % 
 % Usage:  
-%         LSopts = LMoptions(which)
+%         LSopts = LMoptions(which, LSopts)
+% 
+% Possible values for 'which': 'linprog', 'intlinprog', 'lindo'
+% 
   
 % Copyright (c) 2001-2022
 %
@@ -13,6 +16,9 @@ function LSopts = LMoptions(which,LSopts)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargin<2,
     LSopts={};
+    if nargin<1,
+        which = 'linprog';
+end    
 end    
 if strcmp(which,'linprog'),
     % linprog options
