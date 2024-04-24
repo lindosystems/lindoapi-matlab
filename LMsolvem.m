@@ -132,7 +132,7 @@ onCleanup(@() myCleanupFun(iEnv));
 [nErr] = mxlindo('LSsetEnvLogfunc',iEnv,'LMcbLog','Dummy string');
 
 % Set an external solver
-if LSopts.XSOLVER>=1,
+if isfield(LSopts,'XSOLVER') && LSopts.XSOLVER>=1,
     nErr = mxlindo('LSsetXSolverLibrary',iEnv,LSopts.XSOLVER,LSopts.XDLL);
     if nErr ~= LSERR_NO_ERROR, LMcheckError(iEnv,nErr) ; end;
 end

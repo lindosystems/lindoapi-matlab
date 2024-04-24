@@ -79,7 +79,7 @@ lb = []; % use default lower bounds
 ub = []; % use default upper bounds
 ubk = ones(length(eb),1);
 
-opts={};
+opts=LMoptions('lindo',{});
 opts.iDefaultLog=0;
 
 LSprob = {};
