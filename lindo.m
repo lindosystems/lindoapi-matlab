@@ -1,13 +1,13 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%
- %%    LINDO API Version 14.0
- %%    Copyright (c) 2000-2022
+ %%    LINDO API Version 16.0
+ %%    Copyright (c) 2000-2025
  %%
  %%    LINDO Systems, Inc.            312.988.7422
  %%    1415 North Dayton St.          info@lindo.com
  %%    Chicago, IL 60622              http://www.lindo.com
  %%
- %%    $Id: lindo.m 3043 2022-12-20 20:07:38Z mka $
+ %%    $Id: lindo.m 3655 2025-06-24 15:25:12Z mka $
  %%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
@@ -17,11 +17,11 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
  % Version macros %/
- LS_MAJOR_VER_NUMBER                                          = 14;
+ LS_MAJOR_VER_NUMBER                                          = 16;
  LS_MINOR_VER_NUMBER                                          = 0;
- LS_REV_VER_NUMBER                                            = 192;
- LS_VER_NUMBER                                                = 1400;
- LS_BUILD_VER_NUMBER                                          = 5099;
+ LS_REV_VER_NUMBER                                            = 62;
+ LS_VER_NUMBER                                                = 1600;
+ LS_BUILD_VER_NUMBER                                          = 7099;
 
  LS_MIN                                                       = +1;
  LS_MAX                                                       = -1;
@@ -159,6 +159,10 @@
  LS_XSOLVER_CBC                                               = 12;
  LS_XSOLVER_XPR                                               = 13;
  LS_XSOLVER_HIGHS                                             = 14;
+ LS_XSOLVER_IPOPT                                             = 15;
+ LS_XSOLVER_TABOX                                             = 95;
+ LS_XSOLVER_MUMPS                                             = 96;
+ LS_XSOLVER_MUPARSER                                          = 97;
  LS_XSOLVER_LUA                                               = 98;
  LS_XSOLVER_XLINDO                                            = 99;
 
@@ -226,6 +230,7 @@
  LS_IPARAM_FIND_SYMMETRY_PRINT_LEVEL                          = 1056;
  LS_IPARAM_TUNER_PRINT_LEVEL                                  = 1057;
  LS_IPARAM_DEFAULT_SEED                                       = 1058;
+ LS_IPARAM_XSOLVER_LOG_LEVEL                                  = 1059;
 
     % Generic solver parameters (1251 - 1500) %/
  LS_IPARAM_SOLVER_IUSOL                                       = 1251;
@@ -1016,6 +1021,8 @@
  EP_LOGSUMAEXP                                                = 1188;
  EP_EXPMODIV                                                  = 1189;
  EP_POWERUTILITY                                              = 1190;
+ EP_POLYNOMIAL                                                = 1191;
+ EP_CENSOR                                                    = 1192; 
 
 
  % Model and solution information codes ( 110xx-140xx) %/
@@ -1098,6 +1105,7 @@
  LS_DINFO_OBJRELTOL                                           = 11076;
  LS_DINFO_OBJABSTOL                                           = 11077;
  LS_DINFO_OBJTIMLIM                                           = 11078;
+ LS_IINFO_NUM_NLP_COUNT                                       = 11079;
 
  % LP and NLP related info (11200-11299)%/
  LS_IINFO_METHOD                                              = 11200;
@@ -1748,6 +1756,7 @@
  LSERR_XSOLVER_NOT_SUPPORTED                                  = 2091;
  LSERR_XSOLVER_INVALID_VERSION                                = 2092;
  LSERR_FDE_NOT_INSTALLED                                      = 2093;
+ LSERR_MODEL_NOT_SUPPORTED_XSOLVER                            = 2094;
 
     %! @ingroup LSmatrixOps @{ %/
 
@@ -2427,7 +2436,7 @@
 
 
  % NCM methods %/
- LS_NCM_STD                                                   = 	1;
+ LS_NCM_STD                                                   =     1;
  LS_NCM_GA                                                    = 2;
  LS_NCM_ALTP                                                  = 4;
  LS_NCM_L2NORM_CONE                                           = 8;
@@ -2465,7 +2474,7 @@
  LS_MSW_MODE_SAMPLE_FREEVARS                                  = 64;
  LS_MSW_MODE_PRECOLLECT                                       = 128;
  LS_MSW_MODE_POWER_SOLVE                                      = 256;
-
+ LS_MSW_MODE_SHARE_STACK                                      = 512;
 
  LS_GA_CROSS_SBX                                              = 101;
  LS_GA_CROSS_BLXA                                             = 102;
@@ -2492,7 +2501,10 @@
    %! resolve failed lex-model %/
  LS_SOLVER_MODE_LEX_RESOLVEFAIL                               = 128;
 
-
+ LS_SOLVER_MODE_FULL_AGGR                                     = 256;
+ LS_SOLVER_MODE_ADD_PM1_SQR                                   = 512;
+ LS_SOLVER_MODE_ADD_PM1_ABS                                   = 1024;
+   
  LS_PARCLASS_BITMASK                                          = 1;
  LS_PARCLASS_MULSTEP                                          = 2;
  LS_PARCLASS_TUNPAR                                           = 4;
