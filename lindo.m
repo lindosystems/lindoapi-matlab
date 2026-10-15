@@ -1,13 +1,13 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%
- %%    LINDO API Version 16.0
- %%    Copyright (c) 2000-2025
+ %%    LINDO API Version 17.0
+ %%    Copyright (c) 2000-2027
  %%
  %%    LINDO Systems, Inc.            312.988.7422
  %%    1415 North Dayton St.          info@lindo.com
  %%    Chicago, IL 60622              http://www.lindo.com
  %%
- %%    $Id: lindo.m 3655 2025-06-24 15:25:12Z mka $
+ %%    $Id: lindo.m 4107 2026-10-05 22:37:32Z mka $
  %%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
@@ -17,11 +17,11 @@
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
  % Version macros %/
- LS_MAJOR_VER_NUMBER                                          = 16;
+ LS_MAJOR_VER_NUMBER                                          = 17;
  LS_MINOR_VER_NUMBER                                          = 0;
- LS_REV_VER_NUMBER                                            = 62;
- LS_VER_NUMBER                                                = 1600;
- LS_BUILD_VER_NUMBER                                          = 7099;
+ LS_REV_VER_NUMBER                                            = 99;
+ LS_VER_NUMBER                                                = 1700;
+ LS_BUILD_VER_NUMBER                                          = 8099;
 
  LS_MIN                                                       = +1;
  LS_MAX                                                       = -1;
@@ -298,6 +298,10 @@
  LS_IPARAM_LP_BASPOLISH_ITRLMT                                = 4093;
  LS_IPARAM_LP_BASPOLISH_DEPTH                                 = 4094;
  LS_IPARAM_LP_BASPOLISH_MODE                                  = 4095;
+ LS_IPARAM_LP_FOLD_MODE                                       = 4096;
+ LS_IPARAM_LP_XOVER_ENGINE                                       = 4097;
+ LS_IPARAM_LP_FOLD_KBEST                                         = 4098;
+ LS_IPARAM_LP_FOLD_LIFT                                          = 4099;
 
     % Advanced parameters for LU decomposition (4800 - 4+++) %/
  LS_IPARAM_LU_NUM_CANDITS                                     = 4800;
@@ -396,6 +400,9 @@
  LS_IPARAM_NLP_USECUTOFFOBJ                                   = 2554;
  LS_IPARAM_NLP_CONIC_REFORM                                   = 2555;
  LS_IPARAM_NLP_QP_REFORM_LEVEL                                = 2556;
+ LS_IPARAM_NLP_NLOPT_ALGO                                       = 2557;
+ LS_DPARAM_NLP_ENLAMBDA                                       = 2558;
+ LS_IPARAM_NLP_QP_REFINING                                       = 2559;
 
     % Mixed integer programming (MIP) parameters (5000 - 5+++) %/
  LS_IPARAM_MIP_TIMLIM                                         = 5300;
@@ -454,6 +461,21 @@
  LS_IPARAM_MIP_USE_INT_ZERO_TOL                               = 5353;
  LS_IPARAM_MIP_USE_CUTS_HEU                                   = 5354;
  LS_DPARAM_MIP_BIGM_FOR_INTTOL                                = 5355;
+ LS_IPARAM_MIP_PBE_HEU                                       = 5356;
+ LS_IPARAM_MIP_PBE_VARLIM                                       = 5357;
+ LS_IPARAM_MIP_PBE_MAXPASSES                                       = 5358;
+ LS_DPARAM_MIP_PBE_COEFCAP                                       = 5359;
+ LS_DPARAM_MIP_PBE_RATTOL                                       = 5360;
+ LS_IPARAM_MIP_PBE_NODELIM                                       = 5361;
+ LS_IPARAM_MIP_PBE_PROJECT                                       = 5362;
+ LS_IPARAM_MIP_PBE_SELECT                                       = 5363;
+ LS_IPARAM_MIP_PBE_DAMP_ROUNDS                                       = 5364;
+ LS_DPARAM_MIP_PBE_DAMP_PCT                                       = 5365;
+ LS_IPARAM_MIP_PBE_PRINT                                       = 5424;
+ LS_IPARAM_MIP_PBE_OBJCUT                                       = 5425;
+ LS_IPARAM_MIP_OCTANE_HEU                                       = 5426;
+ LS_IPARAM_MIP_OCTANE_FMAX                                       = 5427;
+ LS_IPARAM_MIP_OCTANE_RAYS                                       = 5428;
  LS_IPARAM_MIP_STRONGBRANCHDONUM                              = 5366;
  LS_IPARAM_MIP_MAKECUT_INACTIVE_COUNT                         = 5367;
  LS_IPARAM_MIP_PRE_ELIM_FILL                                  = 5368;
@@ -724,6 +746,7 @@
  LS_IPARAM_SAMP_NCM_ITERLIM                                   = 7706;
     %! Optimality tolerance for NCM method %/
  LS_DPARAM_SAMP_NCM_OPTTOL                                    = 7707;
+ LS_DPARAM_SAMP_CDSMAX                                       = 7708;
     %! Number of parallel threads %/
  LS_IPARAM_SAMP_NUM_THREADS                                   = 7708;
     %! Buffer size for random number generators %/
@@ -1153,6 +1176,7 @@
  LS_SINFO_MODEL_TYPE                                          = 11242;
  LS_IINFO_NLP_LINEARITY                                       = 11243;
  LS_DINFO_ALL_ITER                                            = 11244;
+ LS_DINFO_TIME_TO_BESTSOL                                       = 11245;
 
  % MIP and MINLP related info (11300-11400) %/
  LS_IINFO_MIP_STATUS                                          = 11300;
@@ -1219,8 +1243,10 @@
  LS_IINFO_MIP_SOFTKNAP_CUTS                                   = 11371;
  LS_IINFO_MIP_LP_ROUND_CUTS                                   = 11372;
  LS_IINFO_MIP_PERSPECTIVE_CUTS                                = 11373;
+ LS_IINFO_MIP_PATHMIR_CUTS                                    = 11377;
  LS_IINFO_MIP_STRATEGY_MASK                                   = 11374;
  LS_DINFO_MIP_ALL_ITER                                        = 11375;
+ LS_DINFO_MIP_TIME_TO_BESTSOL                                       = 11376;
 
  % GOP related info (11601-11699) %/
  LS_DINFO_GOP_OBJ                                             = 11600;
@@ -2051,6 +2077,7 @@
  LS_METHOD_SPRINT                                             = 11;
  LS_METHOD_GA                                                 = 12;
  LS_METHOD_FILELP                                             = 13;
+ LS_METHOD_PDLP                                       = 14;
 
 
  LS_STRATEGY_USER                                             = 0;
@@ -2066,6 +2093,8 @@
  LS_NMETHOD_SLP                                               = 8;
  LS_NMETHOD_MSW_GRG                                           = 9;
  LS_NMETHOD_IPOPT                                             = 10;
+ LS_NMETHOD_NLOPT                                       = 11;
+ LS_NMETHOD_ENOPT                                       = 12;
 
 
  LS_PROB_SOLVE_FREE                                           = 0;
@@ -2190,6 +2219,9 @@
  LS_MIP_MODE_NO_BRANCH_CUTS                                   = 16;
  LS_MIP_MODE_NO_LP_BARRIER                                    = 32;
  LS_MIP_MODE_NO_LSLVDP                                        = 64;
+ LS_MIP_MODE_SOS2_GRAY                                       = 128;
+ LS_MIP_MODE_INSMIPSOL                                       = 256;
+ LS_MIP_MODE_INSMIPBND                                       = 512;
 
 
  % Bit mask for cut generation levels. Use sums to
@@ -2211,6 +2243,8 @@
  LS_MIP_DISJUN_CUTS                                           = 16384;
  LS_MIP_SOFT_KNAP_CUTS                                        = 32768;
  LS_MIP_LP_ROUND_CUTS                                         = 65536;
+ LS_MIP_PATHMIR_CUTS                                          = 131072;
+ LS_MIP_PATHMIR_MIX_CUTS                                      = 262144;
 
 
  % Bit masks for MIP preprocessing levels. Use sums
@@ -2227,6 +2261,7 @@
  LS_MIP_PREP_COEF_LIFTING                                     = 512;
  LS_MIP_PREP_MAXPASS                                          = 1024;
  LS_MIP_PREP_SIMROW                                           = 2048;
+ LS_MIP_PREP_EXTERNAL                                       = 16384;
 
 
  % Bit masks for solver preprocessing levels. Use sums
@@ -2239,7 +2274,10 @@
  LS_SOLVER_PREP_DCOL                                          = 32;
  LS_SOLVER_PREP_DROW                                          = 64;
  LS_SOLVER_PREP_CONE                                          = 128;
+ LS_SOLVER_PREP_FLIPGE                                       = 256;
+ LS_SOLVER_PREP_RES512                                       = 512;
  LS_SOLVER_PREP_MAXPASS                                       = 1024;
+ LS_SOLVER_PREP_RES2048                                       = 2048;
  LS_SOLVER_PREP_DECOMP                                        = 4096;
  LS_SOLVER_PREP_LOWMEM                                        = 8192;
  LS_SOLVER_PREP_EXTERNAL                                      = 16384;
@@ -2475,6 +2513,14 @@
  LS_MSW_MODE_PRECOLLECT                                       = 128;
  LS_MSW_MODE_POWER_SOLVE                                      = 256;
  LS_MSW_MODE_SHARE_STACK                                      = 512;
+ LS_MSW_MODE_ENTROPY_POX                                       = 1024;
+ LS_MSW_MODE_MERIT_POX                                       = 2048;
+ LS_MSW_MODE_BOUND_PROP                                       = 4096;
+ LS_MSW_MODE_FEAS_RANK                                       = 8192;
+ LS_MSW_MODE_CONS_CONSENSUS                                       = 16384;
+ LS_MSW_MODE_QMC_SAMPLE                                       = 32768;
+ LS_MSW_MODE_MLSL_FILTER                                       = 65536;
+ LS_MSW_MODE_AUTO                                       = 131072;
 
  LS_GA_CROSS_SBX                                              = 101;
  LS_GA_CROSS_BLXA                                             = 102;
@@ -2504,6 +2550,7 @@
  LS_SOLVER_MODE_FULL_AGGR                                     = 256;
  LS_SOLVER_MODE_ADD_PM1_SQR                                   = 512;
  LS_SOLVER_MODE_ADD_PM1_ABS                                   = 1024;
+ LS_SOLVER_MODE_GREY_AGGR                                       = 2048;
    
  LS_PARCLASS_BITMASK                                          = 1;
  LS_PARCLASS_MULSTEP                                          = 2;
