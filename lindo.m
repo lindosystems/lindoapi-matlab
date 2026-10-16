@@ -160,6 +160,12 @@
  LS_XSOLVER_XPR                                               = 13;
  LS_XSOLVER_HIGHS                                             = 14;
  LS_XSOLVER_IPOPT                                             = 15;
+ LS_XSOLVER_HIGHSLP                                           = 16;
+ LS_XSOLVER_COPT                                              = 17;
+ LS_XSOLVER_COPTLP                                            = 18;
+ LS_XSOLVER_XPRLP                                             = 19;
+ LS_XSOLVER_NLOPT                                             = 20;
+ LS_XSOLVER_MYUSER                                            = 94;
  LS_XSOLVER_TABOX                                             = 95;
  LS_XSOLVER_MUMPS                                             = 96;
  LS_XSOLVER_MUPARSER                                          = 97;
@@ -1046,6 +1052,9 @@
  EP_POWERUTILITY                                              = 1190;
  EP_POLYNOMIAL                                                = 1191;
  EP_CENSOR                                                    = 1192; 
+ EP_ENTROPY                                                   = 1193; 
+ EP_XLOGIT                                                    = 1194; 
+ EP_IRR                                                       = 1195;
 
 
  % Model and solution information codes ( 110xx-140xx) %/
@@ -2061,6 +2070,7 @@
  LSLOC_SP_BENCH_END                                           = 25;
  LSLOC_BNP                                                    = 26;
  LSLOC_OBJPOOL                                                = 27;
+ LSLOC_MIP_SETS                                               = 28;
 
 
  LS_METHOD_FREE                                               = 0;
