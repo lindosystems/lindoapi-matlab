@@ -7,8 +7,8 @@ function  [nErr] = LMrunTuner()
 % Copyright (c) 2020
 %
 % LINDO Systems, Inc.            312.988.7422
-% 1415 North Dayton St.          info@lindo.com
-% Chicago, IL 60622              http://www.lindo.com    
+% 1332 North Halsted Street      info@lindo.com
+% Chicago, Illinois 60642        http://www.lindo.com    
 
 %
 % Last update Jan 09, 2020 (MKA)

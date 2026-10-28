@@ -9,8 +9,8 @@ function flag = LMcbLP2(iModel,iLoc,cbData)
 % Copyright (c) 2001-2007
 %
 % LINDO Systems, Inc.            312.988.7422
-% 1415 North Dayton St.          info@lindo.com
-% Chicago, IL 60622              http://www.lindo.com
+% 1332 North Halsted Street      info@lindo.com
+% Chicago, Illinois 60642        http://www.lindo.com
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set flag to a nonzero value to interrupt the solver, otherwise

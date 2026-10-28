@@ -15,8 +15,8 @@ function [val,nerr] = LMcbFDE1(cbData,nRow,x,njdiff,dXjbase,reserved)
 % Copyright (c) 2001-2007
 %
 % LINDO SYstems, Inc.            312.988.7422
-% 1415 North DaYton St.          info@lindo.com
-% Chicago, IL 60622              http://www.lindo.com
+% 1332 North Halsted Street      info@lindo.com
+% Chicago, Illinois 60642        http://www.lindo.com
 %
 % Last update Jan 09, 2007 (MKA)
 
